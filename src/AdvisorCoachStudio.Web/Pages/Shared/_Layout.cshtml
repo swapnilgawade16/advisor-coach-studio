@@ -1,0 +1,63 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject ProviderReadiness Readiness
+@{
+    var csrf = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+    var signedIn = User.Identity?.IsAuthenticated == true;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="@csrf" />
+    <title>@(ViewData["Title"] is string title ? $"{title} - Advisor Coach Studio" : "Advisor Coach Studio")</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/">
+                <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <defs>
+                        <linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#2f6fe4" />
+                            <stop offset="1" stop-color="#13285e" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="32" height="32" rx="9" fill="url(#brand-gradient)" />
+                    <path d="M9 9.5h14a2.5 2.5 0 0 1 2.5 2.5v6.5a2.5 2.5 0 0 1-2.5 2.5h-7l-4.5 3.5V21H9a2.5 2.5 0 0 1-2.5-2.5V12A2.5 2.5 0 0 1 9 9.5z" fill="#ffffff" />
+                    <path d="M11.5 14.5v2M14.5 13v5M17.5 14v3M20.5 15v1" stroke="#1e5bd6" stroke-width="1.7" stroke-linecap="round" />
+                </svg>
+                <span>Advisor Coach Studio</span>
+            </a>
+            @if (signedIn)
+            {
+                <nav aria-label="Primary">
+                    <a href="/">Scenarios</a>
+                    <form method="post" action="/access?handler=SignOut" class="inline-form">
+                        <input type="hidden" name="__RequestVerificationToken" value="@csrf" />
+                        <button type="submit" class="link-button">Sign out</button>
+                    </form>
+                </nav>
+            }
+        </div>
+    </header>
+    @if (Readiness.IsSimulation)
+    {
+        <div class="simulation-banner" role="note">
+            <strong>@ProviderReadiness.SimulationLabel.</strong> Client speech, transcripts, and reports are scripted for UI development and do not evaluate your voice.
+        </div>
+    }
+    <main id="main" class="container" tabindex="-1">
+        @RenderBody()
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <p>Fictional training simulation for communication practice only &mdash; not financial, legal, investment, or compliance advice. Do not share real client information. Session data is kept in memory only and is discarded when you start a new session, sign out, or the service restarts.</p>
+        </div>
+    </footer>
+    <script type="module" src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

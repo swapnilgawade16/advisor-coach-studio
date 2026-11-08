@@ -1,0 +1,13 @@
+{
+  "type": "response.output_item.added",
+  "event_id": "event_synthetic_0011",
+  "response_id": "resp_synthetic_1",
+  "output_index": 0,
+  "item": {
+    "id": "item_synthetic_client_2",
+    "type": "message",
+    "status": "in_progress",
+    "role": "assistant",
+    "content": []
+  }
+}

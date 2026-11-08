@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore AdvisorCoachStudio.sln
+
+      - name: Build
+        run: dotnet build AdvisorCoachStudio.sln --no-restore -c Release
+
+      - name: Unit tests
+        run: dotnet test tests/AdvisorCoachStudio.UnitTests --no-build -c Release --logger "trx;LogFileName=unit.trx"
+
+      - name: Integration tests (fake Azure provider, no credentials)
+        run: dotnet test tests/AdvisorCoachStudio.IntegrationTests --no-build -c Release --logger "trx;LogFileName=integration.trx"
+
+      - name: Install Playwright Chromium
+        run: pwsh tests/browser/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Browser tests
+        env:
+          ACS_BROWSER_CHANNEL: chromium
+        run: dotnet test tests/browser --no-build -c Release --logger "trx;LogFileName=browser.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore

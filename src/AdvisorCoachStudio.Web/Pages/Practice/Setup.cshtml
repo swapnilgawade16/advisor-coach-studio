@@ -1,0 +1,105 @@
+@page "/practice/{scenarioId}/setup"
+@model SetupModel
+@{
+    ViewData["Title"] = $"Set up: {Model.Scenario.Title}";
+}
+<div id="setup-root" data-scenario-id="@Model.Scenario.Id" data-ready="@(Model.Realtime.IsReady ? "true" : "false")">
+    <section id="setup" class="setup" aria-labelledby="setup-heading">
+        <a class="back-link" href="/">&larr; All scenarios</a>
+        <div class="page-head">
+            <h1 id="setup-heading">@Model.Scenario.Title</h1>
+            <p class="lead">Read the brief, choose a difficulty, check your microphone, and start when you are ready.</p>
+        </div>
+
+        <div class="setup-grid">
+            <aside class="setup-aside" aria-label="Meeting brief and service status">
+                <div class="card">
+                    <h2>Meeting brief</h2>
+                    <div class="brief-client">
+                        <span class="avatar" aria-hidden="true">@Model.Scenario.ClientInitials</span>
+                        <span><strong>@Model.Scenario.ClientDisplayName</strong> <span class="hint">(fictional client)</span></span>
+                    </div>
+                    <p>@Model.Scenario.PublicBrief</p>
+                    <p class="label">Skills to practise</p>
+                    <ul class="chips skills" aria-label="Skills to practise">
+                        @foreach (var skill in Model.Scenario.SkillFocus)
+                        {
+                            <li class="chip">@skill</li>
+                        }
+                    </ul>
+                    <p class="scenario-meta"><span class="icon icon-clock" aria-hidden="true"></span> Ends automatically after @Model.MaxMinutes minutes. You can end it earlier at any time.</p>
+                </div>
+
+                <div class="card readiness" data-status="@Model.Realtime.Status.ToString().ToLowerInvariant()">
+                    <h2>Service status</h2>
+                    <p id="readiness-text" role="status">
+                        @switch (Model.Realtime.Status)
+                        {
+                            case ProviderReadinessStatus.Ready:
+                                <span class="badge badge-ok">Ready</span> @(Model.Realtime.Simulated ? ProviderReadiness.SimulationLabel : "Live voice practice is available.")
+                                break;
+                            case ProviderReadinessStatus.Unavailable:
+                                <span class="badge badge-warn">Service temporarily unavailable</span> @Model.Realtime.Message
+                                break;
+                            default:
+                                <span class="badge badge-info">Azure setup required</span> @Model.Realtime.Message
+                                break;
+                        }
+                    </p>
+                </div>
+            </aside>
+
+            <form id="setup-form" class="card stack" novalidate>
+                <fieldset>
+                    <legend>Choose a difficulty</legend>
+                    @foreach (var level in DifficultyInfo.All)
+                    {
+                        var id = $"difficulty-{level.Name.ToLowerInvariant()}";
+                        <div class="radio">
+                            <input type="radio" id="@id" name="difficulty" value="@level.Name.ToLowerInvariant()" checked="@(level.Level == Difficulty.Intermediate)" aria-describedby="@id-help" />
+                            <label for="@id">@level.Name</label>
+                            <p id="@id-help" class="hint">@level.Description</p>
+                        </div>
+                    }
+                </fieldset>
+
+                <fieldset>
+                    <legend>Check your microphone</legend>
+                    <p class="hint">Your browser will ask for microphone permission. Headphones are recommended to avoid echo.</p>
+                    <div class="button-row">
+                        <button id="mic-test" type="button" class="button secondary">Test microphone</button>
+                    </div>
+                    <div class="meter-row">
+                        <label for="mic-level">Input level</label>
+                        <meter id="mic-level" min="0" max="1" low="0.05" high="0.8" optimum="0.3" value="0"></meter>
+                    </div>
+                    <p id="mic-status" class="hint" role="status">Microphone not tested yet.</p>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Before you start</legend>
+                    <p class="notice">@DataNotice.Text</p>
+                    <div class="checkbox">
+                        <input id="acknowledge" type="checkbox" />
+                        <label for="acknowledge">I understand this is a fictional simulation and I will not share real client information.</label>
+                    </div>
+                </fieldset>
+
+                <div id="setup-error" class="alert alert-error" role="alert" hidden></div>
+                <div id="browser-support" class="alert alert-warning" role="alert" hidden>
+                    Your browser does not support the audio features this practice needs (microphone capture, AudioWorklet, and WebSockets). Use the latest Microsoft Edge or Google Chrome.
+                </div>
+                <div class="button-row">
+                    <button id="start-button" type="submit" class="button primary" disabled>Start practice</button>
+                </div>
+                <p id="start-help" class="hint">Start is available after the service is ready, your microphone works, and you acknowledge the notice.</p>
+            </form>
+        </div>
+    </section>
+
+    <partial name="_LiveConversation" model="Model.Live" />
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/setup.js" asp-append-version="true"></script>
+}

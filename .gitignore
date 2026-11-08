@@ -1,0 +1,31 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+*.user
+*.suo
+*.userprefs
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Test output
+TestResults/
+coverage*/
+*.trx
+playwright-traces/
+
+# Local secrets (never commit these; use dotnet user-secrets or environment variables)
+appsettings.*.local.json
+.env
+.env.*
+!.env.example
+# Azure Developer CLI environments (contain local deployment settings and secrets)
+.azure/
+secrets.json
+
+# OS noise
+Thumbs.db
+.DS_Store

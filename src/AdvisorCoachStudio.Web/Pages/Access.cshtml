@@ -1,0 +1,42 @@
+@page "/access"
+@model AccessModel
+@{
+    ViewData["Title"] = "Access";
+}
+<div class="access-wrap">
+    <section class="card narrow access-card" aria-labelledby="access-heading">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <rect width="32" height="32" rx="9" fill="url(#brand-gradient)" />
+            <path d="M9 9.5h14a2.5 2.5 0 0 1 2.5 2.5v6.5a2.5 2.5 0 0 1-2.5 2.5h-7l-4.5 3.5V21H9a2.5 2.5 0 0 1-2.5-2.5V12A2.5 2.5 0 0 1 9 9.5z" fill="#ffffff" />
+            <path d="M11.5 14.5v2M14.5 13v5M17.5 14v3M20.5 15v1" stroke="#1e5bd6" stroke-width="1.7" stroke-linecap="round" />
+        </svg>
+        <h1 id="access-heading">Advisor Coach Studio</h1>
+        <p class="lead">Practise client conversations with an AI voice client, then get transcript-based coaching feedback.</p>
+        <ul class="feature-list">
+            <li><span class="icon icon-check" aria-hidden="true"></span> Speak with a realistic fictional client in real time</li>
+            <li><span class="icon icon-check" aria-hidden="true"></span> Get a coaching report grounded in your own words</li>
+            <li><span class="icon icon-check" aria-hidden="true"></span> Nothing is stored: each session lives in memory only</li>
+        </ul>
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error" role="alert" id="access-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="post" class="stack" novalidate>
+            <div class="field">
+                <label for="code">Shared access code</label>
+                <input id="code" name="Code" type="password" autocomplete="off" required
+                       aria-describedby="@(Model.ErrorMessage is null ? "code-help" : "code-help access-error")" />
+                <p id="code-help" class="hint">Ask your programme organiser for the code. There are no individual accounts.</p>
+            </div>
+            <button type="submit" class="button primary large">Continue</button>
+        </form>
+
+        <p class="privacy-reminder">
+            This is a fictional training simulation. Do not enter real client names, account details, or confidential information.
+            Your practice session is kept in server memory only and is discarded when you start a new session, sign out, or the service restarts.
+            Entering the code again does not restore previous sessions.
+        </p>
+    </section>
+</div>

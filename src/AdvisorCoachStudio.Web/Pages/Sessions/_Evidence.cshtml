@@ -1,0 +1,17 @@
+@model (AdvisorCoachStudio.Web.Pages.Sessions.ReportModel Page, IReadOnlyList<ReportEvidence> Evidence)
+@if (Model.Evidence.Count > 0)
+{
+    <ul class="evidence" role="list" aria-label="Transcript evidence">
+        @foreach (var evidence in Model.Evidence)
+        {
+            if (Model.Page.Excerpt(evidence) is { } excerpt)
+            {
+                <li>
+                    <a class="evidence-link" href="#turn-@excerpt.Label" data-turn="turn-@excerpt.Label">@excerpt.Label</a>
+                    <q>@excerpt.Excerpt</q>
+                    <span class="hint">@evidence.Explanation</span>
+                </li>
+            }
+        }
+    </ul>
+}

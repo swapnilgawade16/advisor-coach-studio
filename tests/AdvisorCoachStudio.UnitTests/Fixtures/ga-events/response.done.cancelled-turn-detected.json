@@ -1,0 +1,29 @@
+{
+  "type": "response.done",
+  "event_id": "event_synthetic_0017",
+  "response": {
+    "object": "realtime.response",
+    "id": "resp_synthetic_2",
+    "status": "cancelled",
+    "status_details": { "type": "cancelled", "reason": "turn_detected" },
+    "output": [
+      {
+        "id": "item_synthetic_client_4",
+        "type": "message",
+        "status": "incomplete",
+        "role": "assistant",
+        "content": [
+          { "type": "output_audio", "transcript": "I was going to say that I am not sure we" }
+        ]
+      }
+    ],
+    "conversation_id": "conv_synthetic_1",
+    "output_modalities": [ "audio" ],
+    "usage": {
+      "total_tokens": 120,
+      "input_tokens": 90,
+      "output_tokens": 30
+    },
+    "metadata": null
+  }
+}

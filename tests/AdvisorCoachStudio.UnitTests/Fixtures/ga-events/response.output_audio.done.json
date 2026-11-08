@@ -1,0 +1,8 @@
+{
+  "type": "response.output_audio.done",
+  "event_id": "event_synthetic_0013",
+  "response_id": "resp_synthetic_1",
+  "item_id": "item_synthetic_client_2",
+  "output_index": 0,
+  "content_index": 0
+}

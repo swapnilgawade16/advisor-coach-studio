@@ -1,0 +1,227 @@
+@page "/sessions/{sessionId:guid}/report"
+@model ReportModel
+@{
+    ViewData["Title"] = "Coaching report";
+    var s = Model.Snapshot;
+    var r = Model.Report;
+    const double RingCircumference = 326.73; // 2 * pi * 52, the radius of the score ring.
+}
+<div id="report-root" data-session-id="@s.Id" data-report-status="@RealtimeRelay.ReportStatusName(s.ReportStatus)" data-pending="@(Model.IsPending ? "true" : "false")">
+    <div class="report-head">
+        <a class="back-link" href="/">&larr; All scenarios</a>
+        <h1>Coaching report</h1>
+        <p class="lead">@s.ScenarioTitle with @s.ClientDisplayName &middot; @DifficultyInfo.NameOf(s.Difficulty)</p>
+        @if (!string.IsNullOrEmpty(Model.EndReasonText))
+        {
+            <p class="hint">@Model.EndReasonText @(s.TranscriptStatus == TranscriptStatus.Incomplete ? "Some captions were incomplete, so the transcript is marked incomplete." : "")</p>
+        }
+    </div>
+
+    @if (r is null)
+    {
+        <section class="card report-status" aria-labelledby="status-heading">
+            <h2 id="status-heading">Report status</h2>
+            <p id="report-status-text" role="status" aria-live="polite">@Model.StatusMessage</p>
+            @if (Model.CanRetry)
+            {
+                <form method="post" asp-page-handler="Retry">
+                    <button type="submit" class="button primary">Try generating the report again</button>
+                </form>
+            }
+        </section>
+    }
+    else
+    {
+        if (r.IsSimulated)
+        {
+            <div class="alert alert-warning" role="note"><strong>@ProviderReadiness.SimulationLabel.</strong> This report shows the layout only and does not evaluate your conversation.</div>
+        }
+
+        <section class="card" aria-labelledby="overall-heading">
+            <h2 id="overall-heading">Overall assessment</h2>
+            @if (r.OverallScore is { } overall)
+            {
+                var band = overall >= 4.0m ? "band-high" : overall >= 3.0m ? "band-mid" : "band-low";
+                var dash = ((double)overall / 5.0 * RingCircumference).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                <div class="overall-body">
+                    <div class="score-ring @band">
+                        <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+                            <circle class="ring-track" cx="60" cy="60" r="52" />
+                            <circle class="ring-value" cx="60" cy="60" r="52" stroke-dasharray="@dash 326.73" transform="rotate(-90 60 60)" />
+                        </svg>
+                        <p class="overall"><span class="score-big">@overall.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)</span> <span class="score-out">out of 5</span></p>
+                    </div>
+                    <div class="overall-text">
+                        <p class="overall-summary">@r.Content.Summary</p>
+                        <p class="hint">Average of @r.ScoredCategoryCount of 6 skills that had enough evidence (equal weights, rounded once to one decimal place).</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="overall"><strong>Limited evidence</strong> &mdash; no overall score.</p>
+                <p class="hint">An overall score needs at least three scored skills and three usable advisor turns. This attempt had @r.ScoredCategoryCount scored skill(s) and @r.UsableAdvisorTurnCount usable turn(s). Missing evidence is not treated as a low score.</p>
+                <p>@r.Content.Summary</p>
+            }
+        </section>
+
+        <section class="callouts" aria-label="Main strength and priority improvement">
+            <div class="card callout callout-strength">
+                <h2><span class="icon-badge ok" aria-hidden="true"><span class="icon icon-check"></span></span> Main strength</h2>
+                <p>@(r.Content.KeyStrength ?? "Not enough evidence to identify one yet.")</p>
+            </div>
+            <div class="card callout callout-improve">
+                <h2><span class="icon-badge warn" aria-hidden="true"><span class="icon icon-up"></span></span> Highest-priority improvement</h2>
+                <p>@(r.Content.PriorityImprovement ?? "Not enough evidence to identify one yet.")</p>
+            </div>
+        </section>
+
+        <section class="card" aria-labelledby="skills-heading">
+            <h2 id="skills-heading">Skill scores</h2>
+            <ul class="skill-list" role="list">
+                @foreach (var skill in r.Content.SkillScores)
+                {
+                    <li class="skill">
+                        <div class="skill-head">
+                            <h3>@ReportModel.CategoryName(skill.CategoryId)</h3>
+                            <div class="skill-rating">
+                                @if (skill.Score is { } bar)
+                                {
+                                    <span class="score-bar" data-score="@bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                                }
+                                <span class="score-pill" data-score="@(skill.Score?.ToString() ?? "none")">@(skill.Score is { } sc ? $"{sc} / 5" : "Not scored")</span>
+                            </div>
+                        </div>
+                        <p>@skill.Explanation</p>
+                        <partial name="_Evidence" model="(Model, skill.Evidence)" />
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section class="card" aria-labelledby="strengths-heading">
+            <h2 id="strengths-heading" class="subsection-heading"><span class="icon-badge ok" aria-hidden="true"><span class="icon icon-check"></span></span> Strengths</h2>
+            @if (r.Content.Strengths.Count == 0) { <p class="hint">No strengths could be supported with evidence from this transcript.</p> }
+            @foreach (var item in r.Content.Strengths)
+            {
+                <article class="finding finding-strength">
+                    <h3>@item.Title <span class="tag">@ReportModel.CategoryName(item.CategoryId)</span></h3>
+                    <p><span class="label">Observed:</span> @item.Observation</p>
+                    @if (item.Interpretation is not null) { <p><span class="label">Possible interpretation:</span> @item.Interpretation</p> }
+                    <partial name="_Evidence" model="(Model, item.Evidence)" />
+                </article>
+            }
+        </section>
+
+        <section class="card" aria-labelledby="improvements-heading">
+            <h2 id="improvements-heading" class="subsection-heading"><span class="icon-badge warn" aria-hidden="true"><span class="icon icon-up"></span></span> Improvement opportunities</h2>
+            @if (r.Content.Improvements.Count == 0) { <p class="hint">No improvements could be supported with evidence from this transcript.</p> }
+            @foreach (var item in r.Content.Improvements)
+            {
+                <article class="finding finding-improvement">
+                    <h3>@item.Title <span class="tag">@ReportModel.CategoryName(item.CategoryId)</span></h3>
+                    <p><span class="label">Observed:</span> @item.Observation</p>
+                    @if (item.Interpretation is not null) { <p><span class="label">Possible interpretation:</span> @item.Interpretation</p> }
+                    <p class="try-instead"><span class="label">Try instead:</span> @item.SuggestedAdjustment</p>
+                    <partial name="_Evidence" model="(Model, item.Evidence)" />
+                </article>
+            }
+        </section>
+
+        @if (r.Content.AlternativePhrases.Count > 0)
+        {
+            <section class="card" aria-labelledby="phrases-heading">
+                <h2 id="phrases-heading" class="subsection-heading"><span class="icon-badge info" aria-hidden="true"><span class="icon icon-chat"></span></span> Better alternative phrases</h2>
+                @foreach (var phrase in r.Content.AlternativePhrases)
+                {
+                    <article class="phrase">
+                        <p class="label">You said</p>
+                        <partial name="_Evidence" model="(Model, (IReadOnlyList<ReportEvidence>)new[] { phrase.OriginalEvidence })" />
+                        <p class="phrase-suggestion"><span class="label">You could say:</span> &ldquo;@phrase.SuggestedPhrase&rdquo;</p>
+                        <p><span class="label">Intention:</span> @phrase.CommunicationIntention</p>
+                        <p class="hint">@phrase.Explanation</p>
+                    </article>
+                }
+            </section>
+        }
+
+        @if (r.Content.MissedDiscoveryQuestions.Count > 0)
+        {
+            <section class="card" aria-labelledby="questions-heading">
+                <h2 id="questions-heading" class="subsection-heading"><span class="icon-badge info" aria-hidden="true"><span class="icon icon-chat"></span></span> Useful discovery questions</h2>
+                <p class="hint">Suggestions to try next time. These are proposals, not things you said.</p>
+                <ul class="question-list">
+                    @foreach (var q in r.Content.MissedDiscoveryQuestions)
+                    {
+                        <li>
+                            <span class="icon-badge info" aria-hidden="true"><span class="icon icon-chat"></span></span>
+                            <div><strong>&ldquo;@q.Question&rdquo;</strong> &mdash; @q.Purpose <span class="hint">@q.Relevance</span></div>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
+        <section class="card" aria-labelledby="plan-heading">
+            <h2 id="plan-heading" class="subsection-heading"><span class="icon-badge info" aria-hidden="true"><span class="icon icon-target"></span></span> Practice plan</h2>
+            @if (r.Content.PracticePlan.FocusAreas.Count > 0)
+            {
+                <p class="label">Focus on</p>
+                <ul class="chips" aria-label="Focus areas">
+                    @foreach (var area in r.Content.PracticePlan.FocusAreas)
+                    {
+                        <li class="chip">@area</li>
+                    }
+                </ul>
+            }
+            <p class="plan-exercise">@r.Content.PracticePlan.Exercise</p>
+            <p><span class="label">Recommended next scenario:</span> <a href="/practice/@r.Content.PracticePlan.RecommendedScenarioId/setup">@Model.ScenarioTitle(r.Content.PracticePlan.RecommendedScenarioId)</a></p>
+            @foreach (var warning in r.Content.Warnings) { <p class="hint">Note: @warning</p> }
+        </section>
+    }
+
+    <section class="card actions" aria-label="Actions">
+        @if (Model.DemonstrationAvailable)
+        {
+            <button id="demo-open" type="button" class="button secondary">Hear a demonstration</button>
+        }
+        <a class="button primary" href="/practice/@s.ScenarioId/setup">Practise again</a>
+        <form method="post" asp-page-handler="Discard" class="inline-form" id="discard-form">
+            <button type="submit" class="button danger-outline">Discard this session</button>
+        </form>
+        <p class="hint">Practising again or discarding removes this session, its transcript, and its report from memory.</p>
+    </section>
+
+    @if (Model.DemonstrationAvailable)
+    {
+        <partial name="_Demonstration" model="Model.Demonstration" />
+    }
+
+    <section class="card" aria-labelledby="transcript-heading">
+        <details id="report-transcript" open="@(r is null)">
+            <summary><h2 id="transcript-heading" class="inline-heading">Transcript</h2></summary>
+            <p class="hint">Transcripts are generated by speech recognition and may contain errors. Coaching is based on the saved transcript, not on a recording. Interrupted client turns were not fully heard and are never used as evidence.</p>
+            @if (Model.Turns.Count == 0)
+            {
+                <p>No transcript was captured for this session.</p>
+            }
+            <ol class="transcript" aria-label="Saved transcript">
+                @foreach (var turn in Model.Turns)
+                {
+                    var note = ReportModel.StatusNote(turn);
+                    <li id="turn-@Model.TurnLabel(turn)" class="turn turn-@turn.Speaker.ToString().ToLowerInvariant()" tabindex="-1">
+                        <span class="turn-label">@Model.TurnLabel(turn)</span>
+                        <span class="speaker">@ReportModel.SpeakerName(turn.Speaker, s.ClientDisplayName)</span>
+                        @if (!string.IsNullOrEmpty(note)) { <span class="tag tag-warn">@note</span> }
+                        <p>@(string.IsNullOrWhiteSpace(turn.Text) ? "(no caption available)" : turn.Text)</p>
+                    </li>
+                }
+            </ol>
+        </details>
+    </section>
+    <p class="hint">These are communication coaching indicators, not a scientific assessment, professional certification, or financial advice.</p>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/report.js" asp-append-version="true"></script>
+}

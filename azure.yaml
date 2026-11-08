@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# Azure Developer CLI template: `azd up` provisions infra/main.bicep and deploys the web app to Azure App Service.
+# See docs/deployment.md.
+name: advisor-coach-studio
+metadata:
+  template: advisor-coach-studio@1.0.0
+services:
+  web:
+    project: ./src/AdvisorCoachStudio.Web
+    language: dotnet
+    host: appservice

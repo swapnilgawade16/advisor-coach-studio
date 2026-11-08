@@ -1,0 +1,14 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Something went wrong";
+}
+<section class="card narrow">
+    <h1>Something went wrong</h1>
+    <p>The page could not be displayed. Please go back and try again.</p>
+    @if (Model.CorrelationId is not null)
+    {
+        <p class="hint">Reference: <code>@Model.CorrelationId</code></p>
+    }
+    <a class="button primary" href="/">Return to scenarios</a>
+</section>

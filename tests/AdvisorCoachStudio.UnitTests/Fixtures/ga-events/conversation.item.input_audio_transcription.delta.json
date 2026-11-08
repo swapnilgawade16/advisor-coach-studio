@@ -1,0 +1,7 @@
+{
+  "type": "conversation.item.input_audio_transcription.delta",
+  "event_id": "event_synthetic_0007",
+  "item_id": "item_synthetic_advisor_1",
+  "content_index": 0,
+  "delta": "I can hear that "
+}

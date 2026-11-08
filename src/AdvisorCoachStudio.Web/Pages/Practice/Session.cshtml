@@ -1,0 +1,65 @@
+@page "/practice/{sessionId:guid}"
+@model SessionModel
+@{
+    ViewData["Title"] = "Practice conversation";
+    var s = Model.Snapshot;
+}
+<div id="session-root" data-session-id="@s.Id" data-scenario-id="@s.ScenarioId" data-state="@s.State.ToString().ToLowerInvariant()">
+    <a class="back-link" href="/">&larr; All scenarios</a>
+    <h1>@s.ScenarioTitle</h1>
+
+    @switch (s.State)
+    {
+        case ConversationState.Created:
+            <section id="join" class="card stack" aria-labelledby="join-heading">
+                <h2 id="join-heading">Ready to join</h2>
+                <p>Your practice session with @s.ClientDisplayName is ready. Joining will ask for microphone access and start the conversation.</p>
+                <p class="notice">@DataNotice.Text</p>
+                <div class="checkbox">
+                    <input id="acknowledge" type="checkbox" />
+                    <label for="acknowledge">I understand this is a fictional simulation and I will not share real client information.</label>
+                </div>
+                <div id="setup-error" class="alert alert-error" role="alert" hidden></div>
+                <div id="browser-support" class="alert alert-warning" role="alert" hidden>
+                    Your browser does not support the audio features this practice needs. Use the latest Microsoft Edge or Google Chrome.
+                </div>
+                <div class="button-row">
+                    <button id="join-button" type="button" class="button primary" disabled>Join conversation</button>
+                </div>
+            </section>
+            <partial name="_LiveConversation" model="Model.Live" />
+            break;
+
+        case ConversationState.Ended:
+            <section class="card" aria-labelledby="ended-heading">
+                <h2 id="ended-heading">This practice conversation has ended</h2>
+                <p>Your transcript and coaching report are on the report page.</p>
+                <a class="button primary" href="/sessions/@s.Id/report">View coaching report</a>
+            </section>
+            break;
+
+        case ConversationState.Failed:
+        case ConversationState.Expired:
+            <section class="card" aria-labelledby="failed-heading">
+                <h2 id="failed-heading">This session cannot be joined</h2>
+                <p>@(s.State == ConversationState.Failed ? "The voice service connection could not be established." : "This session expired before it started.") Start a new practice session to try again.</p>
+                <a class="button primary" href="/practice/@s.ScenarioId/setup">Start a new attempt</a>
+            </section>
+            break;
+
+        default:
+            <section class="card" aria-labelledby="busy-heading">
+                <h2 id="busy-heading">This conversation is already in progress</h2>
+                <p>It may be open in another tab or window. Each session allows one connection, and a dropped connection cannot be resumed.</p>
+                <a class="button secondary" href="/sessions/@s.Id/report">Go to the report page</a>
+            </section>
+            break;
+    }
+</div>
+
+@section Scripts {
+    @if (s.State == ConversationState.Created)
+    {
+        <script type="module" src="~/js/join.js" asp-append-version="true"></script>
+    }
+}

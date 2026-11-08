@@ -1,0 +1,63 @@
+@page "/"
+@model IndexModel
+@{
+    ViewData["Title"] = "Choose a scenario";
+}
+<section class="intro" aria-labelledby="intro-heading">
+    <h1 id="intro-heading">Practise a client conversation</h1>
+    <p class="lead">You play the advisor. An AI voice plays a fictional client with consistent circumstances and concerns. After a short conversation (up to @Model.MaxMinutes minutes) you receive coaching feedback grounded in your transcript.</p>
+    <ol class="loop" aria-label="How it works">
+        <li><strong>Practise</strong> <span>Choose a scenario and speak with the client.</span></li>
+        <li><strong>Reflect</strong> <span>Review evidence-based feedback.</span></li>
+        <li><strong>Observe</strong> <span>Optionally hear an AI advisor demonstration.</span></li>
+        <li><strong>Retry</strong> <span>Start a fresh attempt and apply the feedback.</span></li>
+    </ol>
+</section>
+
+@if (Model.Current is { } current)
+{
+    <section class="card current-session" aria-labelledby="current-heading">
+        <h2 id="current-heading">Your current session</h2>
+        <p>@current.ScenarioTitle with @current.ClientDisplayName (@DifficultyInfo.NameOf(current.Difficulty)) &mdash; <span class="status">@Model.CurrentStatusText</span></p>
+        <p class="hint">Starting a new practice session will discard this one and its report.</p>
+        <a class="button secondary" href="/sessions/@current.Id/report">View report and transcript</a>
+    </section>
+}
+
+@if (!Model.Realtime.IsReady)
+{
+    <div class="alert @(Model.Realtime.Status == ProviderReadinessStatus.Unavailable ? "alert-warning" : "alert-info")" role="status">
+        <strong>@(Model.Realtime.Status == ProviderReadinessStatus.Unavailable ? "Service temporarily unavailable." : "Azure setup required.")</strong>
+        @Model.Realtime.Message You can still browse scenarios and test your microphone.
+    </div>
+}
+
+<section aria-labelledby="scenarios-heading">
+    <div class="section-head">
+        <h2 id="scenarios-heading">Scenarios</h2>
+        <p class="hint">Each scenario is a fictional client with their own concerns.</p>
+    </div>
+    <ul class="scenario-grid" role="list">
+        @foreach (var scenario in Model.Scenarios)
+        {
+            <li class="card scenario-card">
+                <div class="client-row">
+                    <span class="avatar" aria-hidden="true">@scenario.ClientInitials</span>
+                    <div>
+                        <h3>@scenario.Title</h3>
+                        <p class="client-name">Fictional client: @scenario.ClientDisplayName</p>
+                    </div>
+                </div>
+                <p>@scenario.PublicBrief</p>
+                <ul class="chips skills" aria-label="Skills">
+                    @foreach (var skill in scenario.SkillFocus)
+                    {
+                        <li class="chip">@skill</li>
+                    }
+                </ul>
+                <p class="scenario-meta"><span class="icon icon-clock" aria-hidden="true"></span> Suggested duration: @scenario.SuggestedDuration</p>
+                <a class="button primary" href="/practice/@scenario.Id/setup" aria-label="Practise this scenario: @scenario.Title">Practise this scenario <span class="icon icon-arrow" aria-hidden="true"></span></a>
+            </li>
+        }
+    </ul>
+</section>

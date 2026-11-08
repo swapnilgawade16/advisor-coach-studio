@@ -1,0 +1,32 @@
+{
+  "type": "response.done",
+  "event_id": "event_synthetic_0016",
+  "response": {
+    "object": "realtime.response",
+    "id": "resp_synthetic_1",
+    "status": "completed",
+    "status_details": null,
+    "output": [
+      {
+        "id": "item_synthetic_client_2",
+        "type": "message",
+        "status": "completed",
+        "role": "assistant",
+        "content": [
+          { "type": "output_audio", "transcript": "Thank you for asking. Retirement is what I am worried about." }
+        ]
+      }
+    ],
+    "conversation_id": "conv_synthetic_1",
+    "output_modalities": [ "audio" ],
+    "max_output_tokens": "inf",
+    "usage": {
+      "total_tokens": 300,
+      "input_tokens": 200,
+      "output_tokens": 100,
+      "input_token_details": { "text_tokens": 150, "audio_tokens": 50, "cached_tokens": 0 },
+      "output_token_details": { "text_tokens": 20, "audio_tokens": 80 }
+    },
+    "metadata": null
+  }
+}

@@ -1,0 +1,22 @@
+@model DemonstrationSnapshot?
+<section id="demo-panel" class="card demo-panel" aria-labelledby="demo-heading" hidden>
+    <h2 id="demo-heading">AI advisor demonstration</h2>
+    <p class="hint">An AI advisor models one way to respond to the same fictional client. This is an example only: it is not part of your conversation, your transcript, or your scores, and it is not investment advice. Your microphone is not used.</p>
+    <p id="demo-state" class="state" role="status" aria-live="polite">Not started</p>
+    <div class="button-row">
+        <button id="demo-start" type="button" class="button primary">Play demonstration</button>
+        <button id="demo-stop" type="button" class="button secondary" disabled>Stop</button>
+    </div>
+    <div id="demo-error" class="alert alert-error" role="alert" hidden></div>
+    <h3>Demonstration transcript</h3>
+    <div id="demo-transcript" class="demo-transcript">
+        @if (Model is { Text.Length: > 0 })
+        {
+            <p>@Model.Text</p>
+        }
+        else
+        {
+            <p class="hint">The demonstration transcript appears here as it plays.</p>
+        }
+    </div>
+</section>

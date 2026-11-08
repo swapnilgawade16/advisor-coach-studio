@@ -1,0 +1,6 @@
+{
+  "type": "input_audio_buffer.speech_started",
+  "event_id": "event_synthetic_0003",
+  "audio_start_ms": 1000,
+  "item_id": "item_synthetic_advisor_1"
+}

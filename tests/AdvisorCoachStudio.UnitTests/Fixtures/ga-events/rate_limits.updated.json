@@ -1,0 +1,8 @@
+{
+  "type": "rate_limits.updated",
+  "event_id": "event_synthetic_0019",
+  "rate_limits": [
+    { "name": "requests", "limit": 1000, "remaining": 999, "reset_seconds": 60 },
+    { "name": "tokens", "limit": 50000, "remaining": 49000, "reset_seconds": 60 }
+  ]
+}

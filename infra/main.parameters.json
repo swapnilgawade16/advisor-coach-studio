@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "${AZURE_ENV_NAME}" },
+    "location": { "value": "${AZURE_LOCATION}" },
+    "principalId": { "value": "${AZURE_PRINCIPAL_ID}" },
+    "appServicePlanSku": { "value": "${ACS_APP_SERVICE_SKU=B1}" },
+    "realtimeEndpoint": { "value": "${ACS_REALTIME_ENDPOINT}" },
+    "realtimeDeployment": { "value": "${ACS_REALTIME_DEPLOYMENT}" },
+    "transcriptionModel": { "value": "${ACS_TRANSCRIPTION_MODEL=whisper-1}" },
+    "realtimeVoice": { "value": "${ACS_REALTIME_VOICE}" },
+    "reportsEndpoint": { "value": "${ACS_REPORTS_ENDPOINT}" },
+    "reportsDeployment": { "value": "${ACS_REPORTS_DEPLOYMENT}" },
+    "reportsReasoningEffort": { "value": "${ACS_REPORTS_REASONING_EFFORT}" },
+    "reportsMaxOutputTokens": { "value": "${ACS_REPORTS_MAX_OUTPUT_TOKENS=4000}" },
+    "reportsTimeoutSeconds": { "value": "${ACS_REPORTS_TIMEOUT_SECONDS=60}" },
+    "aiAuthentication": { "value": "${ACS_AI_AUTHENTICATION=ApiKey}" },
+    "aiApiKey": { "value": "${ACS_AI_API_KEY}" },
+    "accessCode": { "value": "${ACS_ACCESS_CODE}" },
+    "accessCodeVersion": { "value": "${ACS_ACCESS_CODE_VERSION=1}" }
+  }
+}

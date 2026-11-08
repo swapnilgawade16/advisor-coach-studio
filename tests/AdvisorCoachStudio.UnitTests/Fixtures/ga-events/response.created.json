@@ -1,0 +1,22 @@
+{
+  "type": "response.created",
+  "event_id": "event_synthetic_0010",
+  "response": {
+    "object": "realtime.response",
+    "id": "resp_synthetic_1",
+    "status": "in_progress",
+    "status_details": null,
+    "output": [],
+    "conversation_id": "conv_synthetic_1",
+    "output_modalities": [ "audio" ],
+    "max_output_tokens": "inf",
+    "audio": {
+      "output": {
+        "format": { "type": "audio/pcm", "rate": 24000 },
+        "voice": "alloy"
+      }
+    },
+    "usage": null,
+    "metadata": null
+  }
+}

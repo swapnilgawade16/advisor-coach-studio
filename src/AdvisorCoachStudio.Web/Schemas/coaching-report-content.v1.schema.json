@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://advisor-coach-studio.local/schemas/coaching-report-content.v1.schema.json",
+  "title": "CoachingReportContent",
+  "description": "Model-generated portion of an Advisor Coach Studio coaching report (schema coaching-report/1.0.0). Compatible with Azure OpenAI strict structured outputs: every property is required, nullable values use type unions, and additionalProperties is false. String/array length bounds are enforced by the server because strict mode does not support them. The recommendedScenarioId enum is replaced at runtime with the loaded scenario catalogue.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [ "summary", "keyStrength", "priorityImprovement", "skillScores", "strengths", "improvements", "alternativePhrases", "missedDiscoveryQuestions", "practicePlan", "warnings" ],
+  "properties": {
+    "summary": { "type": "string" },
+    "keyStrength": { "type": [ "string", "null" ] },
+    "priorityImprovement": { "type": [ "string", "null" ] },
+    "skillScores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "categoryId", "score", "explanation", "evidence" ],
+        "properties": {
+          "categoryId": { "$ref": "#/$defs/categoryId" },
+          "score": { "anyOf": [ { "type": "integer", "enum": [ 1, 2, 3, 4, 5 ] }, { "type": "null" } ] },
+          "explanation": { "type": "string" },
+          "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
+        }
+      }
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "title", "observation", "interpretation", "categoryId", "evidence" ],
+        "properties": {
+          "title": { "type": "string" },
+          "observation": { "type": "string" },
+          "interpretation": { "type": [ "string", "null" ] },
+          "categoryId": { "$ref": "#/$defs/categoryId" },
+          "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
+        }
+      }
+    },
+    "improvements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "title", "observation", "interpretation", "categoryId", "evidence", "suggestedAdjustment" ],
+        "properties": {
+          "title": { "type": "string" },
+          "observation": { "type": "string" },
+          "interpretation": { "type": [ "string", "null" ] },
+          "categoryId": { "$ref": "#/$defs/categoryId" },
+          "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+          "suggestedAdjustment": { "type": "string" }
+        }
+      }
+    },
+    "alternativePhrases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "originalEvidence", "suggestedPhrase", "communicationIntention", "explanation" ],
+        "properties": {
+          "originalEvidence": { "$ref": "#/$defs/evidence" },
+          "suggestedPhrase": { "type": "string" },
+          "communicationIntention": { "type": "string" },
+          "explanation": { "type": "string" }
+        }
+      }
+    },
+    "missedDiscoveryQuestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "question", "purpose", "relevance", "relatedTurnIds" ],
+        "properties": {
+          "question": { "type": "string" },
+          "purpose": { "type": "string" },
+          "relevance": { "type": "string" },
+          "relatedTurnIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "practicePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "focusAreas", "exercise", "recommendedScenarioId" ],
+      "properties": {
+        "focusAreas": { "type": "array", "items": { "type": "string" } },
+        "exercise": { "type": "string" },
+        "recommendedScenarioId": { "type": "string", "enum": [ "market-decline", "fees-and-trust", "first-time-investor" ] }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "categoryId": {
+      "type": "string",
+      "enum": [ "rapport-empathy", "listening-responsiveness", "discovery-questioning", "clarity-language", "handling-concerns", "structure-next-steps" ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "turnId", "quote", "explanation" ],
+      "properties": {
+        "turnId": { "type": "string" },
+        "quote": { "type": "string" },
+        "explanation": { "type": "string" }
+      }
+    }
+  }
+}
